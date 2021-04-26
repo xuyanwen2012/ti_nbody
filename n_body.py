@@ -15,28 +15,22 @@ NUM_MAX_PARTICLE = 32768  # 2^15
 # NUM_MAX_PARTICLE = 8192  # 2^13
 SHAPE_FACTOR = 1
 
-# def declare_particle_tables():
-#     num = ti.field(dtype=ti.i32, shape=())
-#     pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-#     vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-#     mass = ti.field(dtype=ti.f32)
-#     table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-#     table.place(pos).place(vel).place(mass)
-#
-#     return num, pos, vel, mass, table
+
+def declare_particle_tables():
+    num = ti.field(dtype=ti.i32, shape=())
+    pos = ti.Vector.field(n=DIM, dtype=ti.f32)
+    vel = ti.Vector.field(n=DIM, dtype=ti.f32)
+    mass = ti.field(dtype=ti.f32)
+    table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
+    table.place(pos).place(vel).place(mass)
+
+    return num, pos, vel, mass, table
 
 
 # ----------------------- Raw ------------------------------------------------
 
-# (raw_num_particles, raw_particle_pos, raw_particle_vel,
-#  raw_particle_mass, raw_particle_table) = declare_particle_tables()
-raw_num_particles = ti.field(dtype=ti.i32, shape=())
-raw_particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-raw_particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-raw_particle_mass = ti.field(dtype=ti.f32)
-raw_particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-raw_particle_table.place(raw_particle_pos).place(raw_particle_vel).place(
-    raw_particle_mass)
+(raw_num_particles, raw_particle_pos, raw_particle_vel,
+ raw_particle_mass, raw_particle_table) = declare_particle_tables()
 
 
 @ti.func
@@ -70,15 +64,8 @@ def raw_substep():
 
 # ----------------------- Tree ------------------------------------------------
 
-# (tree_num_particles, tree_particle_pos, tree_particle_vel,
-#  tree_particle_mass, tree_particle_table) = declare_particle_tables()
-tree_num_particles = ti.field(dtype=ti.i32, shape=())
-tree_particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-tree_particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-tree_particle_mass = ti.field(dtype=ti.f32)
-tree_particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-tree_particle_table.place(tree_particle_pos).place(tree_particle_vel).place(
-    tree_particle_mass)
+(tree_num_particles, tree_particle_pos, tree_particle_vel,
+ tree_particle_mass, tree_particle_table) = declare_particle_tables()
 
 
 @ti.func
@@ -384,9 +371,13 @@ if __name__ == '__main__':
     initialize(2 ** exp)
 
     for i in range(1000):
-        # raw_substep()
+        raw_substep()
+        build_tree()
         tree_substep()
 
-        # gui.circles(raw_particle_pos.to_numpy() / [2, 1], radius=2, color=0xfbfcbf)
-        gui.circles(tree_particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+        lhs = raw_particle_pos.to_numpy() / [2, 1]
+        rhs = tree_particle_pos.to_numpy() / [2, 1] + [0.5, 0]
+
+        gui.circles(np.concatenate((lhs, rhs), axis=0), radius=2,
+                    color=0xfbfcbf)
         gui.show()
