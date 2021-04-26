@@ -15,18 +15,22 @@ NUM_MAX_PARTICLE = 32768  # 2^15
 # NUM_MAX_PARTICLE = 8192  # 2^13
 SHAPE_FACTOR = 1
 
+
+def declare_particle_tables():
+    num = ti.field(dtype=ti.i32, shape=())
+    pos = ti.Vector.field(n=DIM, dtype=ti.f32)
+    vel = ti.Vector.field(n=DIM, dtype=ti.f32)
+    mass = ti.field(dtype=ti.f32)
+    table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
+    table.place(pos).place(vel).place(mass)
+
+    return num, pos, vel, mass, table
+
+
 # ----------------------- Raw ------------------------------------------------
 
-# Using this table to store all the information (pos, vel, mass) of particles
-# Currently using SoA memory model
-raw_num_particles = ti.field(dtype=ti.i32, shape=())
-raw_particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-raw_particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-raw_particle_mass = ti.field(dtype=ti.f32)
-raw_particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-raw_particle_table.place(raw_particle_pos) \
-    .place(raw_particle_vel) \
-    .place(raw_particle_mass)
+(raw_num_particles, raw_particle_pos, raw_particle_vel,
+ raw_particle_mass, raw_particle_table) = declare_particle_tables()
 
 
 @ti.func
@@ -64,7 +68,11 @@ def raw_substep():
 
 # ----------------------- Tree ------------------------------------------------
 
-# ----------------------- Shared ------------------------------------------------
+(tree_num_particles, tree_particle_pos, tree_particle_vel,
+ tree_particle_mass, tree_particle_table) = declare_particle_tables()
+
+
+# ----------------------- Shared ----------------------------------------------
 
 @ti.func
 def gravity_func(distance):
@@ -101,6 +109,8 @@ if __name__ == '__main__':
     import numpy as np
     import sys
 
+    gui = ti.GUI('N-body Star', res=RES)
+
     # get command line as input
     assert len(sys.argv) == 2
     exp = int(sys.argv[1])
@@ -108,3 +118,5 @@ if __name__ == '__main__':
 
     for i in range(1000):
         raw_substep()
+        gui.circles(raw_particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+        gui.show()
