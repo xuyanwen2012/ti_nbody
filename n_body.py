@@ -1,5 +1,7 @@
 import taichi as ti
+import numpy as np
 import math
+import sys
 
 ti.init(arch=ti.cpu)
 if not hasattr(ti, 'jkl'):
@@ -57,9 +59,14 @@ def raw_substep():
     for i in range(raw_num_particles[None]):
         acceleration = raw_get_gravity_at(raw_particle_pos[i])
         raw_particle_vel[i] += acceleration * DT
+        raw_particle_vel[i] = boundReflect(
+            raw_particle_pos[i],
+            raw_particle_vel[i],
+            0, 1)
 
     for i in range(raw_num_particles[None]):
         raw_particle_pos[i] += raw_particle_vel[i] * DT
+
 
 
 # ----------------------- Tree ------------------------------------------------
@@ -351,17 +358,27 @@ def initialize(num_p: ti.i32):
 
         a = ti.random() * math.tau
         r = ti.sqrt(ti.random()) * 0.3
-        raw_particle_pos[raw_particle_id] = 0.5 + ti.Vector(
-            [ti.cos(a), ti.sin(a)]) * r
 
-        tree_particle_pos[tree_particle_id] = 0.5 + ti.Vector(
-            [ti.cos(a), ti.sin(a)]) * r
+        x, y = ti.cos(a), ti.sin(a)
+        # x, y = ti.cos(a), ti.sin(a)
+        # x, y = 0.25, 0.25
+        # pos = ti.Vector([0.022, 0.01])
+        pos = ti.Vector([x, y]) * r
+
+        raw_particle_pos[raw_particle_id] = 0.5 + pos
+        tree_particle_pos[tree_particle_id] = 0.5 + pos
+
+
+# ----------------------- Analysis --------------------------------------------
+
+def compute_diff(lhs_pos, rhs_pos):
+    xs = np.array(lhs_pos[:, 0] - rhs_pos[:, 0])
+    ys = np.array(lhs_pos[:, 1] - rhs_pos[:, 1])
+
+    print(np.square(xs).sum(), np.square(ys).sum())
 
 
 if __name__ == '__main__':
-    import numpy as np
-    import sys
-
     (x, y) = RES
     gui = ti.GUI('N-body Star', res=(x * 2, y))
 
@@ -370,14 +387,29 @@ if __name__ == '__main__':
     exp = int(sys.argv[1])
     initialize(2 ** exp)
 
-    for i in range(1000):
+    raw_pos = raw_particle_pos.to_numpy()
+    tree_pos = tree_particle_pos.to_numpy()
+    # compute_diff(raw_pos, tree_pos)
+
+    # for i in range(1000):
+    i = 0
+
+    while gui.running:
         raw_substep()
-        build_tree()
+
+        if i % 1000 == 0:
+            build_tree()
+
         tree_substep()
 
-        lhs = raw_particle_pos.to_numpy() / [2, 1]
-        rhs = tree_particle_pos.to_numpy() / [2, 1] + [0.5, 0]
+        raw_pos = raw_particle_pos.to_numpy()
+        tree_pos = tree_particle_pos.to_numpy()
 
+        # Show GUI parts
+        lhs = raw_pos / [2, 1]
+        rhs = tree_pos / [2, 1] + [0.5, 0]
         gui.circles(np.concatenate((lhs, rhs), axis=0), radius=2,
                     color=0xfbfcbf)
         gui.show()
+
+        compute_diff(raw_pos, tree_pos)
