@@ -1,26 +1,25 @@
-import pdb
-
 import taichi as ti
 import taichi.lang
 
 ti.init()
 
 
-@ti.kernel
-def test_kernel_3() -> ti.f32:
-    return ti.random()
+def write_to_file(s):
+    f = open("created.py", 'w')
+    f.write(s)
+    f.close()
 
 
 if __name__ == '__main__':
-
     k_str = '''
+import taichi as ti
+
+@ti.kernel
 def test_kernel() -> ti.f32:
     return ti.random()
     '''
-    exec(k_str)
+    write_to_file(k_str)
+    import created
 
-    # k = taichi.lang.kernel(test_kernel_3)
-    k = taichi.lang.kernel(test_kernel)
-
-    # pdb.set_trace()
-    print(k())
+    test_kernel = taichi.lang.kernel(created.test_kernel)
+    print(test_kernel())
