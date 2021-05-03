@@ -1,7 +1,13 @@
 import taichi as ti
+from enum import Enum
 
 
-def n_body(init_func, update_func):
+class Method(Enum):
+    Native = 1
+    QuadTree = 2
+
+
+def n_body(init_func, update_func, method=Method.Native):
     # This is the kernel for raw method
     raw_kernel_str = '''
 import taichi as ti
@@ -30,7 +36,7 @@ def get_raw_gravity_at(pos):
 
 
 @ti.kernel
-def substep_raw():
+def substep():
     for i in range(num_particles[None]):
         acceleration = get_raw_gravity_at(particle_pos[i])
         particle_vel[i] += acceleration * DT
@@ -47,12 +53,17 @@ def substep_raw():
         f.write(s)
         f.close()
 
-    write_to_file(raw_kernel_str)
+    # Main of Kernel
+    if method == Method.Native:
+        write_to_file(raw_kernel_str)
+    elif method == Method.QuadTree:
+        write_to_file(raw_kernel_str)
+
     import created
 
     created.initialize(2 ** 10)
 
-    return lambda _: created.substep_raw()
+    return lambda _: created.substep()
 
 
 if __name__ == '__main__':
