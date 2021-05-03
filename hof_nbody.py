@@ -35,44 +35,16 @@ def write_to_file(s):
     f.close()
 
 
-def n_body(update_func):
-    raw_str = '''
-import taichi as ti
-
 @ti.func
-def get_gravity_at(pos):
-    acc = particle_pos[0] * 0
-    for i in range(num_particles[None]):
-        acc += particle_mass[i] * %s(particle_pos[i] - pos)
-    return acc
+def gravity_func(distance):
+    """
+    Define which ever the equation used to compute gravity here
+    :param distance: the distance between things.
+    :return:
+    """
+    l2 = distance.norm_sqr() + 1e-3
+    return distance * (l2 ** ((-3) / 2))
 
-
-# The O(N^2) kernel algorithm
-@ti.kernel
-def substep():
-    for i in range(num_particles[None]):
-        acceleration = get_gravity_at(particle_pos[i])
-        particle_vel[i] += acceleration * DT
-        particle_vel[i] = boundReflect(
-            particle_pos[i],
-            particle_vel[i],
-            0, 1)
-
-    for i in range(num_particles[None]):
-        particle_pos[i] += particle_vel[i] * DT
-
-
-''' % update_func.__name__
-
-    write_to_file(raw_str)
-    import created
-
-    desired_substep = taichi.lang.kernel(created.substep)
-
-    return lambda particles: desired_substep()
-
-
-# ----------------------- Raw ------------------------------------------------
 
 @ti.func
 def alloc_particle():
@@ -84,10 +56,56 @@ def alloc_particle():
     return ret
 
 
-# ----------------------- Shared ----------------------------------------------
+@ti.kernel
+def initialize(num_p: ti.i32):
+    """
+    Randomly set the initial position of the particles to start with. Note
+    set a value to 'num_particles[None]' taichi field to indicate.
+    :return: None
+    """
+    for _ in range(num_p):
+        particle_id = alloc_particle()
+
+        m = ti.random() * 1.4 + 0.1
+        particle_mass[particle_id] = m
+
+        a = ti.random() * math.tau
+        r = ti.sqrt(ti.random()) * 0.3
+        x, y = ti.cos(a), ti.sin(a)
+        pos = ti.Vector([x, y]) * r
+        particle_pos[particle_id] = 0.5 + pos
 
 
-# Helper functions I lifted from 'taichi_glsl'
+def n_body(particles, update_func):
+    (num_particles, particle_pos, particle_vel,
+     particle_mass, particle_table) = particles
+
+    raw_str = '''
+import taichi as ti
+
+
+@ti.func
+def get_gravity_at(num_particles, particle_pos, particle_mass, pos):
+    acc = particle_pos[0] * 0
+    for i in range(num_particles[None]):
+        acc += particle_mass[i] * %s(particle_pos[i] - pos)
+    return acc
+
+# The O(N^2) kernel algorithm
+@ti.kernel
+def substep(num_particles: ti.template(), particle_pos: ti.template(), particle_vel: ti.template(), particle_mass: ti.template()):
+    for i in range(num_particles[None]):
+        acceleration = get_gravity_at(num_particles, particle_pos,particle_mass, particle_pos[i])
+        particle_vel[i] += acceleration * DT
+        particle_vel[i] = boundReflect(
+            particle_pos[i],
+            particle_vel[i],
+            0, 1)
+
+    for i in range(num_particles[None]):
+        particle_pos[i] += particle_vel[i] * DT
+
+
 @ti.func
 def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
     """
@@ -114,38 +132,21 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
                     vel[k] *= gamma_perpendicular
     return vel
 
+''' % update_func.__name__
 
-@ti.func
-def gravity_func(distance):
-    """
-    Define which ever the equation used to compute gravity here
-    :param distance: the distance between things.
-    :return:
-    """
-    # --- The equation defined in the new n-body example
-    # (self**2).sum()
-    l2 = distance.norm_sqr() + 1e-3
-    return distance * (l2 ** ((-3) / 2))
+    write_to_file(raw_str)
+    import created
 
+    desired_substep = taichi.lang.kernel(created.substep)
 
-@ti.kernel
-def initialize(num_p: ti.i32):
-    """
-    Randomly set the initial position of the particles to start with. Note
-    set a value to 'num_particles[None]' taichi field to indicate.
-    :return: None
-    """
-    for _ in range(num_p):
-        particle_id = alloc_particle()
+    return lambda particles: desired_substep(num_particles, particle_pos,
+                                             particle_vel, particle_mass)
 
-        m = ti.random() * 1.4 + 0.1
-        particle_mass[particle_id] = m
+    # ----------------------- Raw ---------------------------------------------
 
-        a = ti.random() * math.tau
-        r = ti.sqrt(ti.random()) * 0.3
-        x, y = ti.cos(a), ti.sin(a)
-        pos = ti.Vector([x, y]) * r
-        particle_pos[particle_id] = 0.5 + pos
+    # ----------------------- Shared ------------------------------------------
+
+    # Helper functions I lifted from 'taichi_glsl'
 
 
 if __name__ == '__main__':
@@ -157,11 +158,11 @@ if __name__ == '__main__':
 
     # Main program starts from here
 
-    (num_particles, particle_pos, particle_vel,
-     particle_mass, particle_table) = declare_particle_tables()
-    initialize(2 ** exp)
+    particles = declare_particle_tables()
+
+    initialize(2 ** 10)
 
     update_func = gravity_func
-    kernel = n_body(update_func)
-
+    kernel = n_body(particles, update_func)
+    #
     kernel(1)

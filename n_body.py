@@ -391,6 +391,8 @@ if __name__ == '__main__':
     tree_pos = tree_particle_pos.to_numpy()
     # compute_diff(raw_pos, tree_pos)
 
+    ti.ext_arr
+
     # for i in range(1000):
     i = 0
 
