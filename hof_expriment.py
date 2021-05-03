@@ -49,6 +49,7 @@ if __name__ == '__main__':
     k_str = '''
 import taichi as ti
 
+
 @ti.func
 def get_gravity_at(n_par, par_pos, pos):
     acc = par_pos[0] * 0
@@ -62,7 +63,8 @@ def get_gravity_at(n_par, par_pos, pos):
 def substep(n_par: ti.template(), par_pos: ti.template()):
     for i in range(n_par[None]):
         acceleration = get_gravity_at(n_par, par_pos, par_pos[i])
-        particle_pos[i] += 0.001 * acceleration
+        par_pos[i] += 0.001 * acceleration
+   
     '''
     write_to_file(k_str)
     import created
