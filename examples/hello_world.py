@@ -1,5 +1,7 @@
 import taichi as ti
+
 from ti_nbody import n_body
+from ti_nbody.init_functions import circle
 
 
 @ti.kernel
@@ -23,13 +25,16 @@ def custom_gravity_func(distance):
 
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here
-    init = custom_init_func
+    init = circle
     update = custom_gravity_func
     kernel = n_body(init, update)
 
     # Renderer related
     RES = (640, 480)
     gui = ti.GUI('N-body Star', res=RES)
+
+    for i in range(10000):
+        kernel(1)
 
     # while gui.running:
     #     # gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
