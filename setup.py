@@ -7,5 +7,6 @@ setup(name='ti_nbody',
       author='Yanwen Xu',
       author_email='yxu83@ucsc.edu',
       license='MIT',
+      install_requires=['taichi>=0.7.1'],
       packages=['ti_nbody'],
       zip_safe=False)
