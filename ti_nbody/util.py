@@ -1,3 +1,5 @@
+import inspect
+import os.path
 from enum import Enum
 
 
@@ -7,6 +9,13 @@ class Method(Enum):
 
 
 def write_to_file(s):
-    f = open("__created__.py", 'w')
+    path = os.path.join(os.path.dirname(__file__), "__created__.py")
+    f = open(path, 'w')
     f.write(s)
     f.close()
+    return path
+
+
+def ti_func_to_string(func):
+    lines = inspect.getsource(func)
+    return lines
