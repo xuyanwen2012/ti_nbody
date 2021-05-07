@@ -53,7 +53,7 @@ def raw_get_gravity_at(pos):
     return acc
 
 
-# The O(N^2) kernel algorithm
+# The O(N^2) ti_nbody algorithm
 @ti.kernel
 def raw_substep():
     for i in range(raw_num_particles[None]):
@@ -66,7 +66,6 @@ def raw_substep():
 
     for i in range(raw_num_particles[None]):
         raw_particle_pos[i] += raw_particle_vel[i] * DT
-
 
 
 # ----------------------- Tree ------------------------------------------------
@@ -308,7 +307,7 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
     return vel
 
 
-# The O(NlogN) kernel using quadtree
+# The O(NlogN) ti_nbody using quadtree
 @ti.kernel
 def tree_substep():
     particle_id = 0
@@ -390,8 +389,6 @@ if __name__ == '__main__':
     raw_pos = raw_particle_pos.to_numpy()
     tree_pos = tree_particle_pos.to_numpy()
     # compute_diff(raw_pos, tree_pos)
-
-    ti.ext_arr
 
     # for i in range(1000):
     i = 0

@@ -51,7 +51,7 @@ def get_raw_gravity_at(pos):
     return acc
 
 
-@ti.kernel
+@ti.ti_nbody
 def substep():
     for i in range(num_particles[None]):
         acceleration = get_raw_gravity_at(particle_pos[i])
@@ -205,7 +205,7 @@ def substep():
     #     node_mass[parent] = mass
     #
     #
-    # @ti.kernel
+    # @ti.ti_nbody
     # def build_tree():
     #     """
     #     Once the 'particle table' is populated, we can construct a 'node table',
@@ -309,8 +309,8 @@ def substep():
     #     return vel
     #
     #
-    # # The O(NlogN) kernel using quadtree
-    # @ti.kernel
+    # # The O(NlogN) ti_nbody using quadtree
+    # @ti.ti_nbody
     # def substep():
     #     particle_id = 0
     #     while particle_id < num_particles[None]:
@@ -358,7 +358,7 @@ def gravity_func(distance):
 
 if __name__ == '__main__':
     init_circle_str = '''
-@ti.kernel
+@ti.ti_nbody
 def initialize(num_p: ti.i32):
     for _ in range(num_p):
         particle_id = alloc_particle()
@@ -371,7 +371,7 @@ def initialize(num_p: ti.i32):
 '''
 
     init_uniform_str = '''
-@ti.kernel
+@ti.ti_nbody
 def initialize(num_p: ti.i32):
     for _ in range(num_p):
         particle_id = alloc_particle()
@@ -379,7 +379,7 @@ def initialize(num_p: ti.i32):
         particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
 '''
 
-    # Pick your ingredient for kernel here
+    # Pick your ingredient for ti_nbody here
     init = init_circle_str
     update = gravity_func
 
