@@ -1,10 +1,12 @@
+import pdb
+
 import taichi as ti
-import importlib.util
 
 from .util import *
 
 
 def n_body(init_func, update_func, method=Method.Native):
+    # pdb.set_trace()
     raw_str = '''
 @ti.func
 def get_raw_gravity_at(pos):
@@ -27,11 +29,11 @@ def substep():
 import taichi as ti
 import math
 ti.init()
-DT = 1e-5
+
 DIM = 2
+DT = 1e-5
 NUM_MAX_PARTICLE = 32768  # 2^15
 SHAPE_FACTOR = 1
-
 particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
 particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
 particle_mass = ti.field(dtype=ti.f32)
@@ -56,12 +58,8 @@ def alloc_particle():
         path = write_to_file(raw_kernel_str)
         print(path)
 
-    # TODO: Refactor this
-    spec = importlib.util.spec_from_file_location("ti_nbody",
-                                                  "C:/Users/xuyan/miniconda3/envs/taichi/Lib/site-packages/ti_nbody/__created__.py")
-    created = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(created)
+    generated_lib = import_from_site_packages('__created__.py')
 
-    created.circle(2 ** 10)
+    generated_lib.circle(2 ** 10)
 
-    return lambda _: created.substep()
+    return lambda _: generated_lib.substep()
