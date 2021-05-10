@@ -1,7 +1,5 @@
 import pdb
-
 import taichi as ti
-
 from .util import *
 
 
@@ -28,18 +26,15 @@ def substep():
     raw_kernel_str = '''
 import taichi as ti
 import math
-ti.init()
+import os.path
+import importlib.util
 
-DIM = 2
-DT = 1e-5
-NUM_MAX_PARTICLE = 32768  # 2^15
-SHAPE_FACTOR = 1
-particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-particle_mass = ti.field(dtype=ti.f32)
-particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
-num_particles = ti.field(dtype=ti.i32, shape=())
+cwd = os.getcwd()
+path = os.path.join(cwd, 'examples\hello_world.py')
+spec = importlib.util.spec_from_file_location('client', path)
+imported = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(imported)
+print(imported.__dir__())
 
 @ti.func
 def alloc_particle():
@@ -58,7 +53,7 @@ def alloc_particle():
         path = write_to_file(raw_kernel_str)
         print(path)
 
-    generated_lib = import_from_site_packages('__created__.py')
+    generated_lib = import_from_site_packages('_created.py')
 
     generated_lib.circle(2 ** 10)
 

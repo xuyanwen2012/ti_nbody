@@ -3,13 +3,18 @@ import taichi as ti
 from ti_nbody import n_body
 from ti_nbody.init_functions import circle
 
+ti.init()
 
-@ti.kernel
-def custom_init_func(num_p: ti.i32):
-    for _ in range(num_p):
-        particle_id = alloc_particle()
-        particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-        particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
+DIM = 2
+DT = 1e-5
+NUM_MAX_PARTICLE = 32768  # 2^15
+SHAPE_FACTOR = 1
+particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
+particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
+particle_mass = ti.field(dtype=ti.f32)
+particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
+particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
+num_particles = ti.field(dtype=ti.i32, shape=())
 
 
 @ti.func

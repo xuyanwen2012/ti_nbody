@@ -24,7 +24,7 @@ def import_from(module_name, file_path):
 
 
 def write_to_file(s):
-    path = os.path.join(os.path.dirname(__file__), "__created__.py")
+    path = os.path.join(os.path.dirname(__file__), "_created.py")
     f = open(path, 'w')
     f.write(s)
     f.close()
