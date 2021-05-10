@@ -1,6 +1,6 @@
 import taichi as ti
 
-from ti_nbody import n_body, init_functions
+from ti_nbody import n_body, init_functions, Method
 
 
 @ti.func
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here
     init = init_functions.circle
     update = custom_gravity_func
-    kernel = n_body(init, update)
+    kernel = n_body(init, update, Method.QuadTree)
 
     # Renderer related
     RES = (640, 480)
@@ -27,4 +27,5 @@ if __name__ == '__main__':
     while gui.running:
         gui.circles(kernel.particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
         gui.show()
+        kernel.build_tree()
         kernel.substep()
