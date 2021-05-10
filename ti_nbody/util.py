@@ -23,10 +23,10 @@ def import_from(module_name, file_path):
     return created
 
 
-def write_to_file(s):
-    path = os.path.join(os.path.dirname(__file__), "_created.py")
+def write_to_file(filename, content):
+    path = os.path.join(os.path.dirname(__file__), filename)
     f = open(path, 'w')
-    f.write(s)
+    f.write(content)
     f.close()
     return path
 

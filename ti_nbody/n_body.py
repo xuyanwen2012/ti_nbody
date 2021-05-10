@@ -1,10 +1,21 @@
-import pdb
 import taichi as ti
 from .util import *
 
+# ti.init(arch=ti.cpu)
+#
+# DT = 1e-5
+# DIM = 2
+# NUM_MAX_PARTICLE = 32768  # 2^15
+# SHAPE_FACTOR = 1
+# particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
+# particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
+# particle_mass = ti.field(dtype=ti.f32)
+# particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
+# particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
+# num_particles = ti.field(dtype=ti.i32, shape=())
+
 
 def n_body(init_func, update_func, method=Method.Native):
-    # pdb.set_trace()
     raw_str = '''
 @ti.func
 def get_raw_gravity_at(pos):
@@ -26,14 +37,19 @@ def substep():
     raw_kernel_str = '''
 import taichi as ti
 import math
-import os.path
-import importlib.util
 
-cwd = os.getcwd()
-path = os.path.join(cwd, 'examples\hello_world.py')
-spec = importlib.util.spec_from_file_location('client', path)
-_imp = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(_imp)
+ti.init(arch=ti.cpu)
+
+DT = 1e-5
+DIM = 2
+NUM_MAX_PARTICLE = 32768  # 2^15
+SHAPE_FACTOR = 1
+particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
+particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
+particle_mass = ti.field(dtype=ti.f32)
+particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
+particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
+num_particles = ti.field(dtype=ti.i32, shape=())
 
 @ti.func
 def alloc_particle():
@@ -49,26 +65,15 @@ def alloc_particle():
 %s
 ''' % (ti_func_to_string(init_func), ti_func_to_string(update_func), raw_str)
 
-    processed_kernel_str = raw_kernel_str.replace("num_particles",
-                                                  "_imp.num_particles")
-    processed_kernel_str = processed_kernel_str.replace("particle_pos",
-                                                        "_imp.particle_pos")
-    processed_kernel_str = processed_kernel_str.replace("particle_vel",
-                                                        "_imp.particle_vel")
-    processed_kernel_str = processed_kernel_str.replace("particle_mass",
-                                                        "_imp.particle_mass")
-    processed_kernel_str = processed_kernel_str.replace("DT", "_imp.DT")
-    processed_kernel_str = processed_kernel_str.replace("NUM_MAX_PARTICLE",
-                                                        "_imp.NUM_MAX_PARTICLE")
-
+    generated_name = "_created.py"
     if method == Method.Native:
-        path = write_to_file(processed_kernel_str)
+        path = write_to_file(generated_name, raw_kernel_str)
         print(path)
 
-    generated_lib = import_from_site_packages('_created.py')
+    generated_lib = import_from_site_packages(generated_name)
 
-    # pdb.set_trace()
     generated_lib.circle(2 ** 10)
     print(generated_lib)
 
-    return lambda _: generated_lib.substep()
+    # return lambda _: generated_lib.substep()
+    return generated_lib
