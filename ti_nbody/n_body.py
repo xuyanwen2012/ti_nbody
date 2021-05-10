@@ -43,6 +43,7 @@ def alloc_particle():
     particle_pos[ret] = particle_pos[0] * 0
     particle_vel[ret] = particle_pos[0] * 0
     return ret
+    
 %s
 %s
 %s
@@ -66,6 +67,8 @@ def alloc_particle():
 
     generated_lib = import_from_site_packages('_created.py')
 
+    # pdb.set_trace()
     generated_lib.circle(2 ** 10)
+    print(generated_lib)
 
     return lambda _: generated_lib.substep()

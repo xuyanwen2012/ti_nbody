@@ -1,9 +1,11 @@
+import pdb
+
 import taichi as ti
 
 from ti_nbody import n_body
 from ti_nbody.init_functions import circle
 
-ti.init()
+ti.init(arch=ti.cpu)
 
 DIM = 2
 DT = 1e-5
@@ -38,9 +40,12 @@ if __name__ == '__main__':
     RES = (640, 480)
     gui = ti.GUI('N-body Star', res=RES)
 
-    for i in range(10000):
-        kernel(1)
+    # for i in range(10000):
+
+    kernel(1)
+    print(particle_pos.to_numpy())
 
     # while gui.running:
-    #     # gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
-    #     gui.show()
+    #     gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+    # gui.show()
+    # kernel(1)
