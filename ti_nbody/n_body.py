@@ -32,9 +32,8 @@ import importlib.util
 cwd = os.getcwd()
 path = os.path.join(cwd, 'examples\hello_world.py')
 spec = importlib.util.spec_from_file_location('client', path)
-imported = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(imported)
-print(imported.__dir__())
+_imp = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(_imp)
 
 @ti.func
 def alloc_particle():
@@ -49,8 +48,20 @@ def alloc_particle():
 %s
 ''' % (ti_func_to_string(init_func), ti_func_to_string(update_func), raw_str)
 
+    processed_kernel_str = raw_kernel_str.replace("num_particles",
+                                                  "_imp.num_particles")
+    processed_kernel_str = processed_kernel_str.replace("particle_pos",
+                                                        "_imp.particle_pos")
+    processed_kernel_str = processed_kernel_str.replace("particle_vel",
+                                                        "_imp.particle_vel")
+    processed_kernel_str = processed_kernel_str.replace("particle_mass",
+                                                        "_imp.particle_mass")
+    processed_kernel_str = processed_kernel_str.replace("DT", "_imp.DT")
+    processed_kernel_str = processed_kernel_str.replace("NUM_MAX_PARTICLE",
+                                                        "_imp.NUM_MAX_PARTICLE")
+
     if method == Method.Native:
-        path = write_to_file(raw_kernel_str)
+        path = write_to_file(processed_kernel_str)
         print(path)
 
     generated_lib = import_from_site_packages('_created.py')
