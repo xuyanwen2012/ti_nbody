@@ -3,7 +3,7 @@ from .util import *
 
 
 def n_body(init_func, update_func, method=Method.Native):
-    particle_decl = '''import taichi as ti
+    particle_decl = '''import taichi as ti`
 import math
 ti.init()
 if not hasattr(ti, 'jkl'):

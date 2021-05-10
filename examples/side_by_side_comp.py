@@ -28,12 +28,12 @@ if __name__ == '__main__':
     h = 480
     gui = ti.GUI('N-body Star', res=(w * 2, h))
 
-    while gui.running:
-        raw_pos = raw_par_pos.to_numpy() / 2
-        tree_pos = raw_par_pos.to_numpy() / 2 + 0.5
-
-        gui.circles(np.append(raw_pos, tree_pos), radius=2, color=0xfbfcbf)
-        gui.show()
-
-        raw_kernel()
-        tree_kernel()
+    # while gui.running:
+    #     raw_pos = raw_par_pos.to_numpy()
+    #     tree_pos = raw_par_pos.to_numpy()
+    #
+    #     gui.circles(np.append(raw_pos, tree_pos), radius=2, color=0xfbfcbf)
+    #     gui.show()
+    #
+    raw_kernel()
+    tree_kernel()
