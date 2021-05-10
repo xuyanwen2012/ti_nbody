@@ -31,6 +31,12 @@ def write_to_file(filename, content):
     return path
 
 
+def remove_tmp_file(filename):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(dir_path, filename)
+    os.remove(path)
+
+
 def ti_func_to_string(func):
     lines = inspect.getsource(func)
     return lines

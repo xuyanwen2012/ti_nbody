@@ -1,18 +1,5 @@
-import taichi as ti
+import uuid
 from .util import *
-
-# ti.init(arch=ti.cpu)
-#
-# DT = 1e-5
-# DIM = 2
-# NUM_MAX_PARTICLE = 32768  # 2^15
-# SHAPE_FACTOR = 1
-# particle_pos = ti.Vector.field(n=DIM, dtype=ti.f32)
-# particle_vel = ti.Vector.field(n=DIM, dtype=ti.f32)
-# particle_mass = ti.field(dtype=ti.f32)
-# particle_table = ti.root.dense(indices=ti.i, dimensions=NUM_MAX_PARTICLE)
-# particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
-# num_particles = ti.field(dtype=ti.i32, shape=())
 
 
 def n_body(init_func, update_func, method=Method.Native):
@@ -65,15 +52,10 @@ def alloc_particle():
 %s
 ''' % (ti_func_to_string(init_func), ti_func_to_string(update_func), raw_str)
 
-    generated_name = "_created.py"
+    generated_name = "_created" + uuid.uuid1().hex + ".py"
     if method == Method.Native:
-        path = write_to_file(generated_name, raw_kernel_str)
-        print(path)
+        write_to_file(generated_name, raw_kernel_str)
 
     generated_lib = import_from_site_packages(generated_name)
-
     generated_lib.circle(2 ** 10)
-    print(generated_lib)
-
-    # return lambda _: generated_lib.substep()
     return generated_lib

@@ -1,7 +1,6 @@
 import taichi as ti
 
-from ti_nbody import n_body
-from ti_nbody.init_functions import circle
+from ti_nbody import n_body, init_functions
 
 
 @ti.func
@@ -17,7 +16,7 @@ def custom_gravity_func(distance):
 
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here
-    init = circle
+    init = init_functions.circle
     update = custom_gravity_func
     kernel = n_body(init, update)
 

@@ -11,7 +11,6 @@ def circle(num_p: ti.i32):
         r = ti.sqrt(ti.random()) * 0.3
         particle_pos[particle_id] = 0.5 + ti.Vector(
             [ti.cos(a), ti.sin(a)]) * r
-        # print(particle_pos[particle_id])
 
 
 @ti.kernel
