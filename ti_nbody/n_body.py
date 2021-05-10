@@ -284,4 +284,12 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
 
     generated_lib = import_from_site_packages(generated_name)
     generated_lib.circle(2 ** 10)
-    return generated_lib
+
+    if method == Method.Native:
+        return lambda: generated_lib.substep(), generated_lib.particle_pos
+    elif method == Method.QuadTree:
+        def lam():
+            generated_lib.build_tree()
+            generated_lib.substep()
+
+        return lam, generated_lib.particle_pos
