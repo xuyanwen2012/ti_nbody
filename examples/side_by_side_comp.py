@@ -1,3 +1,4 @@
+import numpy as np
 import taichi as ti
 
 from ti_nbody import n_body, init_functions, Method
@@ -18,15 +19,23 @@ if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here
     init = init_functions.circle
     update = custom_gravity_func
-    (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
+
+    (raw_kernel, raw_par_pos) = n_body(init, update, Method.Native)
+    (tree_kernel, tree_par_pos) = n_body(init, update, Method.QuadTree)
 
     # Renderer related
-    RES = (640, 480)
-    gui = ti.GUI('N-body Star', res=RES)
+    w = 640
+    h = 480
+    gui = ti.GUI('N-body Star', res=(w * 2, h))
 
-    while gui.running:
-        gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
-        gui.show()
-        kernel()
-        print(kernel.total_time_build,
-              kernel.total_time_substep)
+    # while gui.running:
+    #     raw_pos = raw_par_pos.to_numpy()
+    #     tree_pos = raw_par_pos.to_numpy()
+    #
+    #     gui.circles(np.append(raw_pos, tree_pos), radius=2, color=0xfbfcbf)
+    #     gui.show()
+    #
+
+
+    raw_kernel()
+    tree_kernel()
