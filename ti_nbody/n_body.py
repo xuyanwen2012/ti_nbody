@@ -1,9 +1,19 @@
 import uuid
 from .util import *
+import time
+
+
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+
+    return decorate
 
 
 def n_body(init_func, update_func, method=Method.Native):
-    particle_decl = '''import taichi as ti`
+    particle_decl = '''import taichi as ti
 import math
 ti.init()
 if not hasattr(ti, 'jkl'):
@@ -119,7 +129,7 @@ def substep():
 
     tree_kernel_str = '''
 %s
-T_MAX_DEPTH = 1 * NUM_MAX_PARTICLE
+T_MAX_DEPTH = 8
 T_MAX_NODES = 4 * T_MAX_DEPTH
 LEAF = -1
 TREE = -2
@@ -283,7 +293,7 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
         write_to_file(generated_name, tree_kernel_str)
 
     generated_lib = import_from_site_packages(generated_name)
-    generated_lib.circle(2 ** 10)
+    generated_lib.circle(2 ** 15)
 
     if method == Method.Native:
         def lam():
@@ -291,8 +301,20 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
 
         return lam, generated_lib.particle_pos
     elif method == Method.QuadTree:
+        @static_vars(counter=0, total_time_build=0, total_time_substep=0)
         def lam():
-            generated_lib.build_tree()
-            generated_lib.substep()
+            lam.counter += 1
+            if lam.counter % 1 == 0:
+                start = time.time()
+                generated_lib.build_tree()
+                end = time.time()
+                lam.total_time_build = (end - start)
 
+            start2 = time.time()
+            generated_lib.substep()
+            end2 = time.time()
+            lam.total_time_substep = (end2 - start2)
+
+        generated_lib.build_tree()
+        generated_lib.substep()
         return lam, generated_lib.particle_pos

@@ -28,3 +28,5 @@ if __name__ == '__main__':
         gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
         gui.show()
         kernel()
+        print(kernel.total_time_build,
+              kernel.total_time_substep)
