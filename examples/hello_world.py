@@ -1,15 +1,9 @@
 import taichi as ti
-
 from ti_nbody import n_body, init_functions, Method
 
 
 @ti.func
 def custom_gravity_func(distance):
-    """
-    Define which ever the equation used to compute gravity here
-    :param distance: the distance between things.
-    :return:
-    """
     l2 = distance.norm_sqr() + 1e-3
     return distance * (l2 ** ((-3) / 2))
 
@@ -28,5 +22,3 @@ if __name__ == '__main__':
         gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
         gui.show()
         kernel()
-        print(kernel.total_time_build,
-              kernel.total_time_substep)
