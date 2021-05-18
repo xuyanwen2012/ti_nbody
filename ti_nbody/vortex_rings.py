@@ -5,7 +5,7 @@ from .util import *
 def vortex_rings(init_func, update_func, method=Method.Native):
     particle_decl = '''eps = 0.01
 dt = 0.1
-n_vortex = 4
+n_vortex = 16
 n_tracer = 200000
 pos = ti.Vector.field(2, ti.f32, shape=n_vortex)
 new_pos = ti.Vector.field(2, ti.f32, shape=n_vortex)
@@ -56,10 +56,34 @@ pos[0] = [0, 1]
 pos[1] = [0, -1]
 pos[2] = [0, 0.3]
 pos[3] = [0, -0.3]
+pos[4] = [0, 1.5]
+pos[5] = [0, -1.5]
+pos[6] = [0, 0.35]
+pos[7] = [0, -0.35]
+pos[8] = [0, 1.75]
+pos[9] = [0, -1.75]
+pos[10] = [0, 0.375]
+pos[11] = [0, -0.375]
+pos[12] = [0, 1.575]
+pos[13] = [0, -1.575]
+pos[14] = [0, 0.3575]
+pos[15] = [0, -0.3575]
 vort[0] = 1
 vort[1] = -1
 vort[2] = 1
 vort[3] = -1
+vort[4] = 1
+vort[5] = -1
+vort[6] = 1
+vort[7] = -1
+vort[8]  = 1
+vort[9]  = -1
+vort[10] = 1
+vort[11] = -1
+vort[12] = 1
+vort[13] = -1
+vort[14] = 1
+vort[15] = -1
 ''' % (particle_decl,
        ti_func_to_string(init_func),
        ti_func_to_string(update_func),

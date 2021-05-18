@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 import taichi as ti
-from ti_nbody import vortex_rings, Method
+from ti_nbody import vortex_rings
 
 eps = 0.01
 dt = 0.1
