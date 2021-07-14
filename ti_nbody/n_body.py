@@ -12,6 +12,13 @@ def static_vars(**kwargs):
     return decorate
 
 
+def timed_kernel(init_func, update_func, method=Method.Native):
+    t0 = time.time()
+    n_body(init_func, update_func, method)
+    t1 = time.time()
+    print(f'Time: {t1 - t0}')
+
+
 def n_body(init_func, update_func, method=Method.Native):
     particle_decl = '''import taichi as ti
 import math
@@ -303,18 +310,10 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
     elif method == Method.QuadTree:
         @static_vars(counter=0, total_time_build=0, total_time_substep=0)
         def lam():
-            # lam.counter += 1
-            # if lam.counter % 1 == 0:
-            #     start = time.time()
             generated_lib.build_tree()
-            # end = time.time()
-            # lam.total_time_build = (end - start)
-
-            # start2 = time.time()
             generated_lib.substep()
-            # end2 = time.time()
-            # lam.total_time_substep = (end2 - start2)
 
         generated_lib.build_tree()
         generated_lib.substep()
+
         return lam, generated_lib.particle_pos
