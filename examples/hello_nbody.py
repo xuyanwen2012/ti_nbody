@@ -1,6 +1,7 @@
 import taichi as ti
 
 from ti_nbody import n_body, Method
+from ti_nbody.init_functions import circle
 
 
 @ti.func
@@ -19,7 +20,7 @@ def custom_init_func(num_p: ti.i32):
 
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
-    init = custom_init_func
+    init = circle
     update = custom_gravity_func
     (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
 

@@ -136,7 +136,7 @@ def substep():
 
     tree_kernel_str = '''
 %s
-T_MAX_DEPTH = 8
+T_MAX_DEPTH = 8 * NUM_MAX_PARTICLE
 T_MAX_NODES = 4 * T_MAX_DEPTH
 LEAF = -1
 TREE = -2
