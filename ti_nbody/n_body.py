@@ -3,12 +3,37 @@ from .util import *
 
 
 def n_body(init_func, update_func, method=Method.Native):
-    with open(
-            os.path.join(os.path.dirname(__file__), 'algorithms', 'common.py'),
-            'r') as file:
-        data = file.read()
+    kernel_str = read_ti_files('common')
+    kernel_str += f'\n\n{ti_func_to_string(init_func)}'
+    kernel_str += f'\n\n{ti_func_to_string(update_func)}\n\n'
+    kernel_str += read_ti_files('native')
+    kernel_str = kernel_str.replace('__GRAVITY_FUNC_NAME__',
+                                    update_func.__name__)
 
-    print(data)
+    print('========================================================')
+    print(kernel_str)
+    print('========================================================')
+
+    generated_name = "_created" + uuid.uuid1().hex + ".py"
+    if method == Method.Native:
+        write_to_file(generated_name, kernel_str)
+    elif method == Method.QuadTree:
+        pass
+
+    generated_lib = import_from_site_packages(generated_name)
+    generated_lib.custom_init_func(2 ** 14)
+
+    if method == Method.Native:
+        def lam():
+            generated_lib.substep()
+
+        return lam, generated_lib.particle_pos
+    elif method == Method.QuadTree:
+        def lam():
+            generated_lib.build_tree()
+            generated_lib.substep()
+
+        return lam, generated_lib.particle_pos
 
 #     particle_decl = '''import taichi as ti
 # import math

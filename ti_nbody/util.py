@@ -9,6 +9,14 @@ class Method(Enum):
     QuadTree = 2
 
 
+def read_ti_files(filename):
+    with open(os.path.join(os.path.dirname(__file__),
+                           f'algorithms/{filename}.py'),
+              'r') as file:
+        data = file.read()
+    return data
+
+
 def import_from_site_packages(filename):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     path = os.path.join(dir_path, filename)

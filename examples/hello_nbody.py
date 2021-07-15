@@ -2,6 +2,7 @@ import taichi as ti
 
 from ti_nbody import n_body, Method
 
+
 # from ti_nbody.init_functions import circle
 
 
@@ -23,13 +24,13 @@ if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
     init = custom_init_func
     update = custom_gravity_func
-    (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
+    (kernel, particle_pos) = n_body(init, update, Method.Native)
 
-    # # GUI Renderer related
-    # RES = (640, 480)
-    # gui = ti.GUI('N-body Star', res=RES)
-    #
-    # while gui.running:
-    #     gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
-    #     gui.show()
-    #     kernel()
+    # GUI Renderer related
+    RES = (640, 480)
+    gui = ti.GUI('N-body Star', res=RES)
+
+    while gui.running:
+        gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+        gui.show()
+        kernel()
