@@ -28,3 +28,24 @@ def alloc_particle():
     particle_pos[ret] = particle_pos[0] * 0
     particle_vel[ret] = particle_pos[0] * 0
     return ret
+
+
+@ti.func
+def reflect_boundary(pos,
+                     vel,
+                     pmin=0,
+                     pmax=1,
+                     rebound=1,
+                     rebound_perpendicular=1):
+    """
+    Reflects particle velocity from a rectangular boundary (if collides).
+    `boundaryReflect` takes particle position, velocity and other parameters.
+    """
+    cond = pos < pmin and vel < 0 or pos > pmax and vel > 0
+    for j in ti.static(range(pos.n)):
+        if cond[j]:
+            vel[j] *= -rebound
+            for k in ti.static(range(pos.n)):
+                if k != j:
+                    vel[k] *= rebound_perpendicular
+    return vel

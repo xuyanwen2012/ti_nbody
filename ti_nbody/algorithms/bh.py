@@ -123,7 +123,7 @@ def get_tree_gravity_at(position):
         particle_id = node_particle_id[parent]
         if particle_id >= 0:
             distance = particle_pos[particle_id] - position
-            acc += particle_mass[particle_id] * gravity_func(distance)
+            acc += particle_mass[particle_id] * __GRAVITY_FUNC_NAME__(distance)
 
         else:  # TREE or LEAF
             for which in ti.grouped(ti.ndrange(*([2] * kDim))):
@@ -133,7 +133,7 @@ def get_tree_gravity_at(position):
                 node_center = node_weighted_pos[child] / node_mass[child]
                 distance = node_center - position
                 if distance.norm_sqr() > kShapeFactor ** 2 * parent_geo_size ** 2:
-                    acc += node_mass[child] * gravity_func(distance)
+                    acc += node_mass[child] * __GRAVITY_FUNC_NAME__(distance)
                 else:
                     new_trash_id = alloc_trash()
                     child_geo_size = parent_geo_size * 0.5
