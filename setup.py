@@ -8,5 +8,5 @@ setup(name='ti_nbody',
       author_email='yxu83@ucsc.edu',
       license='MIT',
       install_requires=['taichi>=0.7.1', 'numpy>=1.20'],
-      packages=['ti_nbody'],
+      packages=['ti_nbody', 'ti_nbody/algorithms'],
       zip_safe=False)
