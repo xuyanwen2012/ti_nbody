@@ -35,12 +35,12 @@ def a_alloc_particle():
     return ret
 
 
-@ti.kernel
-def a_init_func(num_p: ti.i32):
-    for _ in range(num_p):
-        particle_id = a_alloc_particle()
-        a_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-        a_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
+# @ti.kernel
+# def a_init_func(num_p: ti.i32):
+#     for _ in range(num_p):
+#         particle_id = a_alloc_particle()
+#         a_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
+#         a_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
 
 
 @ti.func
@@ -77,7 +77,7 @@ b_particle_table_len = ti.field(ti.i32, ())
 
 
 @ti.func
-def alloc_particle():
+def b_alloc_particle():
     ret = ti.atomic_add(b_particle_table_len[None], 1)
     assert ret < kMaxParticles
     b_particle_mass[ret] = 0
@@ -86,12 +86,12 @@ def alloc_particle():
     return ret
 
 
-@ti.kernel
-def b_init_func(num_p: ti.i32):
-    for _ in range(num_p):
-        particle_id = alloc_particle()
-        b_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-        b_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
+# @ti.kernel
+# def b_init_func(num_p: ti.i32):
+#     for _ in range(num_p):
+#         particle_id = alloc_particle()
+#         b_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
+#         b_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
 
 
 trash_particle_id = ti.field(ti.i32)
@@ -258,6 +258,22 @@ def b_substep():
 
 # --------
 
+@ti.kernel
+def both_init_func(num_p: ti.i32):
+    for _ in range(num_p):
+        mass = ti.random() * 1.4 + 0.1
+        rnd_pos = ti.Vector([ti.random(), ti.random()])
+
+        a_particle_id = a_alloc_particle()
+        b_particle_id = b_alloc_particle()
+
+        a_particle_mass[a_particle_id] = mass
+        a_particle_pos[a_particle_id] = rnd_pos.copy()
+
+        b_particle_mass[b_particle_id] = mass
+        b_particle_pos[b_particle_id] = rnd_pos.copy()
+
+
 @ti.func
 def gravity_func(distance):
     l2 = distance.norm_sqr() + 1e-3
@@ -289,8 +305,7 @@ if __name__ == '__main__':
     RES = (640 * 2, 480)
     gui = ti.GUI('N-body Star', res=RES)
 
-    a_init_func(8192)
-    b_init_func(8192)
+    both_init_func(8192)
 
     while gui.running:
         lhs = a_particle_pos.to_numpy()
@@ -300,7 +315,7 @@ if __name__ == '__main__':
         rhs += (0.5, 0)
         result = np.concatenate((lhs, rhs), axis=0)
 
-        gui.circles(result, radius=2, color=0xfbfcbf)
+        gui.circles(result, radius=1, color=0xfbfcbf)
         gui.show()
 
         a_substep()
