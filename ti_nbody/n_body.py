@@ -12,6 +12,13 @@ def static_vars(**kwargs):
     return decorate
 
 
+def timed_kernel(lam, init_func, update_func, method=Method.Native):
+    t0 = time.time()
+    n_body(init_func, update_func, method)
+    t1 = time.time()
+    print(f'Time: {t1 - t0}')
+
+
 def n_body(init_func, update_func, method=Method.Native):
     particle_decl = '''import taichi as ti
 import math
@@ -129,7 +136,7 @@ def substep():
 
     tree_kernel_str = '''
 %s
-T_MAX_DEPTH = 8
+T_MAX_DEPTH = 8 * NUM_MAX_PARTICLE
 T_MAX_NODES = 4 * T_MAX_DEPTH
 LEAF = -1
 TREE = -2
@@ -293,28 +300,30 @@ def boundReflect(pos, vel, pmin=0, pmax=1, gamma=1, gamma_perpendicular=1):
         write_to_file(generated_name, tree_kernel_str)
 
     generated_lib = import_from_site_packages(generated_name)
-    generated_lib.circle(2 ** 15)
+    generated_lib.custom_init_func(2 ** 14)
 
     if method == Method.Native:
         def lam():
+            t0 = time.time()
             generated_lib.substep()
+            t1 = time.time()
+            print("Substep: ", t1 - t0)
 
         return lam, generated_lib.particle_pos
     elif method == Method.QuadTree:
-        @static_vars(counter=0, total_time_build=0, total_time_substep=0)
+        # @static_vars(counter=0, total_time_build=0, total_time_substep=0)
         def lam():
-            lam.counter += 1
-            if lam.counter % 1 == 0:
-                start = time.time()
-                generated_lib.build_tree()
-                end = time.time()
-                lam.total_time_build = (end - start)
+            t0 = time.time()
+            generated_lib.build_tree()
+            t1 = time.time()
+            # print("Build tree NS: ", t1-t0)
 
-            start2 = time.time()
+            t2 = time.time()
             generated_lib.substep()
-            end2 = time.time()
-            lam.total_time_substep = (end2 - start2)
+            t3 = time.time()
+            print("Substep", t3 - t2)
 
         generated_lib.build_tree()
         generated_lib.substep()
+
         return lam, generated_lib.particle_pos
