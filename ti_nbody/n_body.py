@@ -17,9 +17,9 @@ def n_body(init_func, update_func, method=Method.Native):
     kernel_str = kernel_str.replace('__GRAVITY_FUNC_NAME__',
                                     update_func.__name__)
 
-    print('========================================================')
-    print(kernel_str)
-    print('========================================================')
+    # print('========================================================')
+    # print(kernel_str)
+    # print('========================================================')
 
     write_to_file(generated_name, kernel_str)
 

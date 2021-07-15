@@ -13,8 +13,8 @@ def substep():
         particle_vel[i] += acceleration * dt
         # We dont have to do it here, but we want to make sure the results is
         # aligned with the quadtree approach.
-        particle_vel[i] = reflect_boundary(particle_pos[particle_id],
-                                           particle_vel[particle_id],
+        particle_vel[i] = reflect_boundary(particle_pos[i],
+                                           particle_vel[i],
                                            0, 1)
     for i in range(particle_table_len[None]):
         particle_pos[i] += particle_vel[i] * dt
