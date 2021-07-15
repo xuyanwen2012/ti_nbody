@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
     init = circle
     update = custom_gravity_func
-    (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
+    (kernel, particle_pos) = n_body(init, update, Method.Native)
 
     # GUI Renderer related
     RES = (640, 480)
