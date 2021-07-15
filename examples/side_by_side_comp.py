@@ -1,4 +1,3 @@
-import numpy as np
 import taichi as ti
 
 from ti_nbody import n_body, init_functions, Method
