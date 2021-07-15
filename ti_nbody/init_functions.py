@@ -1,3 +1,6 @@
+import taichi as ti
+
+
 @ti.kernel
 def circle(num_p: ti.i32):
     for _ in range(num_p):

@@ -146,7 +146,7 @@ def get_tree_gravity_at(position):
 
 
 @ti.kernel
-def substep_tree():
+def substep():
     particle_id = 0
     while particle_id < particle_table_len[None]:
         acceleration = get_tree_gravity_at(particle_pos[particle_id])
