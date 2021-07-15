@@ -35,14 +35,6 @@ def a_alloc_particle():
     return ret
 
 
-# @ti.kernel
-# def a_init_func(num_p: ti.i32):
-#     for _ in range(num_p):
-#         particle_id = a_alloc_particle()
-#         a_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-#         a_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
-
-
 @ti.func
 def get_raw_gravity_at(pos):
     acc = a_particle_pos[0] * 0
@@ -84,14 +76,6 @@ def b_alloc_particle():
     b_particle_pos[ret] = b_particle_pos[0] * 0
     b_particle_vel[ret] = b_particle_pos[0] * 0
     return ret
-
-
-# @ti.kernel
-# def b_init_func(num_p: ti.i32):
-#     for _ in range(num_p):
-#         particle_id = alloc_particle()
-#         b_particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-#         b_particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
 
 
 trash_particle_id = ti.field(ti.i32)
@@ -308,17 +292,23 @@ if __name__ == '__main__':
     both_init_func(8192)
 
     while gui.running:
-        lhs = a_particle_pos.to_numpy()
+        lhs = a_particle_pos.to_numpy()  # truth
         rhs = b_particle_pos.to_numpy()
+
+        diffs = (rhs - lhs).sum()
+        print(diffs)
+
         lhs /= (2, 1)
         rhs /= (2, 1)
         rhs += (0.5, 0)
         result = np.concatenate((lhs, rhs), axis=0)
 
-        gui.circles(result, radius=1, color=0xfbfcbf)
+        gui.circles(result, radius=1.5, color=0xfbfcbf)
         gui.show()
 
         a_substep()
 
         build_tree()
         b_substep()
+
+        # do a simple comparison
