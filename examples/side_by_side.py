@@ -1,6 +1,7 @@
 import taichi as ti
-import math
 import numpy as np
+import time
+from matplotlib import pyplot as plt
 
 ti.init(arch=ti.cpu)
 
@@ -291,7 +292,14 @@ if __name__ == '__main__':
 
     both_init_func(8192)
 
-    while gui.running:
+    # Precompile this thing
+    a_substep()
+    build_tree()
+    b_substep()
+
+    time_data = np.zeros(shape=(1000, 2))
+
+    for step in range(1000):
         lhs = a_particle_pos.to_numpy()  # truth
         rhs = b_particle_pos.to_numpy()
 
@@ -306,9 +314,20 @@ if __name__ == '__main__':
         gui.circles(result, radius=1.5, color=0xfbfcbf)
         gui.show()
 
+        t0 = time.time()
         a_substep()
+        t1 = time.time()
 
+        t2 = time.time()
         build_tree()
         b_substep()
+        t3 = time.time()
 
-        # do a simple comparison
+        time_data[step] = (t1 - t0, t3 - t2)
+
+    print(time_data)
+    plt.title("Matplotlib demo")
+    plt.xlabel("Time Step")
+    plt.ylabel("Simulation time")
+    plt.plot(time_data)
+    plt.show()
