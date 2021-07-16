@@ -297,14 +297,15 @@ if __name__ == '__main__':
     build_tree()
     b_substep()
 
-    time_data = np.zeros(shape=(1000, 2))
+    NUM_TESTS = 500
 
-    for step in range(1000):
+    time_data = np.zeros(shape=(NUM_TESTS, 2))
+    for step in range(NUM_TESTS):
         lhs = a_particle_pos.to_numpy()  # truth
         rhs = b_particle_pos.to_numpy()
 
         diffs = (rhs - lhs).sum()
-        print(diffs)
+        print(f'[{step}/{NUM_TESTS}]', diffs)
 
         lhs /= (2, 1)
         rhs /= (2, 1)
@@ -329,5 +330,7 @@ if __name__ == '__main__':
     plt.title("Matplotlib demo")
     plt.xlabel("Time Step")
     plt.ylabel("Simulation time")
-    plt.plot(time_data)
+    plt.plot(time_data[:, 0], label="native")
+    plt.plot(time_data[:, 1], label="quadtree")
+    plt.legend()
     plt.show()
