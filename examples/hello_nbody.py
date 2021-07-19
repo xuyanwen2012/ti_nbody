@@ -24,7 +24,7 @@ def custom_init_func(num_p: ti.i32):
             y = 2 * ti.random() - 1
         rand_disk_2d = ti.Vector([x, y])
 
-        particle_pos[particle_id] = rand_disk_2d * 0.5 + 0.5
+        particle_pos[particle_id] = ti.Vector([0.5, 0.5])
 
         # velocity = (particle_pos[particle_id] - 0.5) * angular_velocity * 250
         # particle_vel[particle_id] = ti.Vector([-velocity.y, velocity.x])

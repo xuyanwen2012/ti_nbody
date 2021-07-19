@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 ti.init(arch=ti.cpu)
 
 kShapeFactor = 1
-kMaxParticles = 8192
+kMaxParticles = 8192 * 4
 kMaxDepth = kMaxParticles * 1
 kMaxNodes = kMaxParticles * 4
 kDim = 2
@@ -290,14 +290,14 @@ if __name__ == '__main__':
     RES = (640 * 2, 480)
     gui = ti.GUI('N-body Star', res=RES)
 
-    both_init_func(8192)
+    both_init_func(8192 * 4)
 
     # Precompile this thing
     a_substep()
     build_tree()
     b_substep()
 
-    NUM_TESTS = 500
+    NUM_TESTS = 150
 
     time_data = np.zeros(shape=(NUM_TESTS, 2))
     for step in range(NUM_TESTS):
@@ -326,7 +326,6 @@ if __name__ == '__main__':
 
         time_data[step] = (t1 - t0, t3 - t2)
 
-    print(time_data)
     plt.title("Matplotlib demo")
     plt.xlabel("Time Step")
     plt.ylabel("Simulation time")
