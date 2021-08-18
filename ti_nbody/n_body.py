@@ -24,7 +24,7 @@ def n_body(init_func, update_func, method=Method.Native):
     write_to_file(generated_name, kernel_str)
 
     generated_lib = import_from_site_packages(generated_name)
-    generated_lib.init_func(8192)
+    generated_lib.init_func(1024)
 
     if method == Method.Native:
         def lam():
