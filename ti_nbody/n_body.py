@@ -13,7 +13,7 @@ def n_body(init, update_func, method=Method.Native, threads=1, theta=1.0):
     kernel_str = kernel_str.replace("PARTICLE_PARAM", str(num))
     kernel_str = kernel_str.replace("THETA_PARAM", str(theta))
     kernel_str = kernel_str.replace("NUM_THREADS_PARAM", str(threads))
-    
+
     kernel_str += f'\n\n{ti_func_to_string(update_func)}\n\n'
 
     generated_name = "_created" + uuid.uuid1().hex + ".py"

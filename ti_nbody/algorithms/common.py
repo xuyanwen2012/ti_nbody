@@ -5,7 +5,7 @@ ti.init(arch=ti.cpu)
 
 kNumThreads = NUM_THREADS_PARAM
 kTheta = THETA_PARAM
-kMaxParticles = PARTICLE_PARAM*8
+kMaxParticles = PARTICLE_PARAM * 4
 kMaxDepth = kMaxParticles * 1
 kMaxNodes = kMaxParticles * 4
 kDim = 2

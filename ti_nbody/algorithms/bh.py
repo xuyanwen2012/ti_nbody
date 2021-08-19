@@ -136,7 +136,8 @@ def get_tree_gravity_at(position):
                     continue
                 node_center = node_weighted_pos[child] / node_mass[child]
                 distance = node_center - position
-                if distance.norm_sqr() > (1.0/kTheta) ** 2 * parent_geo_size ** 2:
+                if distance.norm_sqr() > (
+                        1.0 / kTheta) ** 2 * parent_geo_size ** 2:
                     acc += node_mass[child] * __GRAVITY_FUNC_NAME__(distance)
                 else:
                     new_trash_id = alloc_trash()
@@ -162,6 +163,7 @@ def substep():
         particle_id = particle_id + 1
     for i in range(particle_table_len[None]):
         particle_pos[i] += particle_vel[i] * dt
+
 
 # Tree rendering code is based on Taichi's example repository.
 # https://github.com/taichi-dev/taichi/blob/master/examples

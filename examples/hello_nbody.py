@@ -17,17 +17,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-p", "--particles", default=1024, type=int,
-                    help="number of particles")
+                        help="number of particles")
 
     parser.add_argument("-m", "--mode", default="naive", type=str,
-                    help="algorithm mode (tree or naive)")
+                        help="algorithm mode (tree or naive)")
 
     parser.add_argument("-t", "--theta", default=1.0, type=float,
-                    help="theta parameter for tree mode")
+                        help="theta parameter for tree mode")
 
     parser.add_argument("-th", "--threads", default=1, type=int,
-                        help="how many threads to run with")    
-    
+                        help="how many threads to run with")
+
     args = parser.parse_args()
 
     if args.mode == "naive":
@@ -37,15 +37,15 @@ if __name__ == '__main__':
         M = Method.QuadTree
         m = "tree"
     else:
-        assert(False)
+        assert False
 
     print("running with particles: " + str(args.particles))
     print("running with method: " + m)
-    if m == "tree":        
+    if m == "tree":
         print("  tree mode using theta of: " + str(args.theta))
     else:
         print("  running naive mode with threads: " + str(args.threads))
-    
+
     init = (args.particles, uniform)
     update = custom_gravity_func
     (kernel, gen_lib) = n_body(init, update, M, args.threads, args.theta)
