@@ -3,8 +3,9 @@ import math
 
 ti.init(arch=ti.cpu)
 
-kShapeFactor = 1
-kMaxParticles = 8192
+kNumThreads = NUM_THREADS_PARAM
+kTheta = THETA_PARAM
+kMaxParticles = PARTICLE_PARAM*8
 kMaxDepth = kMaxParticles * 1
 kMaxNodes = kMaxParticles * 4
 kDim = 2

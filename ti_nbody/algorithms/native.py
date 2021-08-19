@@ -8,6 +8,8 @@ def get_raw_gravity_at(pos):
 
 @ti.kernel
 def substep():
+
+    ti.parallelize(kNumThreads)
     for i in range(particle_table_len[None]):
         acceleration = get_raw_gravity_at(particle_pos[i])
         particle_vel[i] += acceleration * dt

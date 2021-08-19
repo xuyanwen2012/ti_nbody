@@ -250,7 +250,7 @@ def render_tree(gui,
 
 if __name__ == '__main__':
     # GUI Renderer related
-    gui = ti.GUI('N-body Star', res=(640, 480))
+    gui = ti.GUI('N-body Star', res=(1280, 960))
 
     init_func(64)
 

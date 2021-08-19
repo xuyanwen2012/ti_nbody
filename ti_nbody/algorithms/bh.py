@@ -132,7 +132,7 @@ def get_tree_gravity_at(position):
                     continue
                 node_center = node_weighted_pos[child] / node_mass[child]
                 distance = node_center - position
-                if distance.norm_sqr() > kShapeFactor ** 2 * parent_geo_size ** 2:
+                if distance.norm_sqr() > (1.0/kTheta) ** 2 * parent_geo_size ** 2:
                     acc += node_mass[child] * __GRAVITY_FUNC_NAME__(distance)
                 else:
                     new_trash_id = alloc_trash()
