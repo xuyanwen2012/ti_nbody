@@ -1,20 +1,27 @@
 import taichi as ti
 
 from ti_nbody import n_body, Method
-from ti_nbody.init_functions import uniform
 
 
 @ti.func
 def custom_gravity_func(distance):
-    l2 = distance.norm_sqr() + 1e-3
-    return distance * (l2 ** ((-3) / 2))
+    l = distance.norm() + 1e-3
+    return distance / (l ** 2)
+
+
+@ti.kernel
+def custom_init_func(num_p: ti.i32):
+    for _ in range(num_p):
+        particle_id = alloc_particle()
+        particle_mass[particle_id] = 1.0 * ti.random() - 0.5
+        particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
 
 
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
-    init = (1024, uniform)
+    init = (1024, custom_init_func)
     update = custom_gravity_func
-    (kernel, gen_lib) = n_body(init, update, Method.QuadTree)
+    (kernel, gen_lib) = n_body(init, update, Method.Native)
 
     # GUI Renderer related
     RES = (640, 480)
