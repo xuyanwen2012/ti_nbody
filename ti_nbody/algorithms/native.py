@@ -14,7 +14,7 @@ def substep():
         acceleration = get_raw_gravity_at(particle_pos[i])
         particle_vel[i] += acceleration * dt
         # We dont have to do it here, but we want to make sure the results is
-        # aligned with the quadtree approach.
+        # same with the quadtree approach.
         particle_vel[i] = reflect_boundary(particle_pos[i],
                                            particle_vel[i],
                                            0, 1)
