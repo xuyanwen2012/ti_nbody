@@ -32,7 +32,7 @@ def custom_init_func(num_p: ti.i32):
 
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
-    init = uniform
+    init = (1024, uniform)
     update = custom_gravity_func
     (kernel, gen_lib) = n_body(init, update, Method.QuadTree)
 

@@ -2,7 +2,9 @@ import uuid
 from .util import *
 
 
-def n_body(init_func, update_func, method=Method.Native):
+def n_body(init, update_func, method=Method.Native):
+    (num, init_func) = init
+
     kernel_str = read_ti_files('common')
     kernel_str += f'\n\n{ti_func_to_string(init_func)}'.replace(
         init_func.__name__, 'init_func')
@@ -24,7 +26,7 @@ def n_body(init_func, update_func, method=Method.Native):
     write_to_file(generated_name, kernel_str)
 
     generated_lib = import_from_site_packages(generated_name)
-    generated_lib.init_func(1024)
+    generated_lib.init_func(num)
 
     if method == Method.Native:
         def lam():
