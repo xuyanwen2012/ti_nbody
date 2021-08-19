@@ -1,3 +1,7 @@
+# Tree code is based on Taichi's example repository.
+# N-body gravity simulation in 300 lines of Taichi, tree method, no multipole, O(N log N)
+# Author: archibate <1931127624@qq.com>, all left reserved
+
 trash_particle_id = ti.field(ti.i32)
 trash_base_parent = ti.field(ti.i32)
 trash_base_geo_center = ti.Vector.field(kDim, ti.f32)
@@ -159,7 +163,8 @@ def substep():
     for i in range(particle_table_len[None]):
         particle_pos[i] += particle_vel[i] * dt
 
-
+# Tree rendering code is based on Taichi's example repository.
+# https://github.com/taichi-dev/taichi/blob/master/examples
 def render_tree(gui,
                 parent=0,
                 parent_geo_center=ti.Vector([0.5, 0.5]),
