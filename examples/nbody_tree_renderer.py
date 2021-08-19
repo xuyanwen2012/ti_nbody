@@ -1,3 +1,71 @@
+import taichi as ti
+import math
+
+ti.init(arch=ti.cpu)
+
+kShapeFactor = 1
+kMaxParticles = 8192
+kMaxDepth = kMaxParticles * 1
+kMaxNodes = kMaxParticles * 4
+kDim = 2
+
+dt = 0.00005
+LEAF = -1
+TREE = -2
+
+particle_mass = ti.field(ti.f32)
+particle_pos = ti.Vector.field(kDim, ti.f32)
+particle_vel = ti.Vector.field(kDim, ti.f32)
+particle_table = ti.root.dense(ti.i, kMaxParticles)
+particle_table.place(particle_pos).place(particle_vel).place(particle_mass)
+particle_table_len = ti.field(ti.i32, ())
+
+
+@ti.func
+def alloc_particle():
+    ret = ti.atomic_add(particle_table_len[None], 1)
+    assert ret < kMaxParticles
+    particle_mass[ret] = 0
+    particle_pos[ret] = particle_pos[0] * 0
+    particle_vel[ret] = particle_pos[0] * 0
+    return ret
+
+
+@ti.func
+def reflect_boundary(pos,
+                     vel,
+                     pmin=0,
+                     pmax=1,
+                     rebound=1,
+                     rebound_perpendicular=1):
+    """
+    Reflects particle velocity from a rectangular boundary (if collides).
+    `boundaryReflect` takes particle position, velocity and other parameters.
+    """
+    cond = pos < pmin and vel < 0 or pos > pmax and vel > 0
+    for j in ti.static(range(pos.n)):
+        if cond[j]:
+            vel[j] *= -rebound
+            for k in ti.static(range(pos.n)):
+                if k != j:
+                    vel[k] *= rebound_perpendicular
+    return vel
+
+
+@ti.kernel
+def init_func(num_p: ti.i32):
+    for _ in range(num_p):
+        particle_id = alloc_particle()
+        particle_mass[particle_id] = ti.random() * 1.4 + 0.1
+        particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
+
+
+@ti.func
+def custom_gravity_func(distance):
+    l2 = distance.norm_sqr() + 1e-3
+    return distance * (l2 ** ((-3) / 2))
+
+
 trash_particle_id = ti.field(ti.i32)
 trash_base_parent = ti.field(ti.i32)
 trash_base_geo_center = ti.Vector.field(kDim, ti.f32)
@@ -123,7 +191,7 @@ def get_tree_gravity_at(position):
         particle_id = node_particle_id[parent]
         if particle_id >= 0:
             distance = particle_pos[particle_id] - position
-            acc += particle_mass[particle_id] * __GRAVITY_FUNC_NAME__(distance)
+            acc += particle_mass[particle_id] * custom_gravity_func(distance)
 
         else:  # TREE or LEAF
             for which in ti.grouped(ti.ndrange(*([2] * kDim))):
@@ -133,7 +201,7 @@ def get_tree_gravity_at(position):
                 node_center = node_weighted_pos[child] / node_mass[child]
                 distance = node_center - position
                 if distance.norm_sqr() > kShapeFactor ** 2 * parent_geo_size ** 2:
-                    acc += node_mass[child] * __GRAVITY_FUNC_NAME__(distance)
+                    acc += node_mass[child] * custom_gravity_func(distance)
                 else:
                     new_trash_id = alloc_trash()
                     child_geo_size = parent_geo_size * 0.5
@@ -178,3 +246,20 @@ def render_tree(gui,
         child_geo_center = parent_geo_center + (which - 0.5) * child_geo_size
         gui.rect(a, b, radius=1, color=0xff0000)
         render_tree(gui, child, child_geo_center, child_geo_size)
+
+
+if __name__ == '__main__':
+    # GUI Renderer related
+    gui = ti.GUI('N-body Star', res=(640, 480))
+
+    init_func(64)
+
+    while gui.running:
+        gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+
+        build_tree()
+        substep()
+
+        render_tree(gui)
+
+        gui.show()

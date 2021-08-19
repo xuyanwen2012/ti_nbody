@@ -30,10 +30,10 @@ def n_body(init_func, update_func, method=Method.Native):
         def lam():
             generated_lib.substep()
 
-        return lam, generated_lib.particle_pos
+        return lam, generated_lib
     elif method == Method.QuadTree:
         def lam():
             generated_lib.build_tree()
             generated_lib.substep()
 
-        return lam, generated_lib.particle_pos
+        return lam, generated_lib

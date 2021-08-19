@@ -34,13 +34,13 @@ if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
     init = uniform
     update = custom_gravity_func
-    (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
+    (kernel, gen_lib) = n_body(init, update, Method.QuadTree)
 
     # GUI Renderer related
     RES = (640, 480)
     gui = ti.GUI('N-body Star', res=RES)
 
     while gui.running:
-        gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+        gui.circles(gen_lib.particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
         gui.show()
         kernel()
