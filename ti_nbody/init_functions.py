@@ -1,5 +1,4 @@
 import taichi as ti
-import math
 
 
 @ti.kernel

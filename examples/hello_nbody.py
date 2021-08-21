@@ -1,7 +1,8 @@
 import taichi as ti
+import argparse
 
 from ti_nbody import n_body, Method
-from ti_nbody.init_functions import circle
+from ti_nbody.init_functions import uniform
 
 
 @ti.func
@@ -10,26 +11,50 @@ def custom_gravity_func(distance):
     return distance * (l2 ** ((-3) / 2))
 
 
-@ti.kernel
-def custom_init_func(num_p: ti.i32):
-    for _ in range(num_p):
-        particle_id = alloc_particle()
-        particle_mass[particle_id] = ti.random() * 1.4 + 0.1
-        particle_pos[particle_id] = ti.Vector([ti.random(), ti.random()])
-
-
 if __name__ == '__main__':
     # Pick your ingredient for ti_nbody here, that's all it is
-    init = custom_init_func
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-p", "--particles", default=1024, type=int,
+                        help="number of particles")
+
+    parser.add_argument("-m", "--mode", default="naive", type=str,
+                        help="algorithm mode (tree or naive)")
+
+    parser.add_argument("-t", "--theta", default=1.0, type=float,
+                        help="theta parameter for tree mode")
+
+    parser.add_argument("-th", "--threads", default=1, type=int,
+                        help="how many threads to run with")
+
+    args = parser.parse_args()
+
+    if args.mode == "naive":
+        M = Method.Native
+        m = "native"
+    elif args.mode == "tree":
+        M = Method.QuadTree
+        m = "tree"
+    else:
+        assert False
+
+    print("running with particles: " + str(args.particles))
+    print("running with method: " + m)
+    if m == "tree":
+        print("  tree mode using theta of: " + str(args.theta))
+    else:
+        print("  running naive mode with threads: " + str(args.threads))
+
+    init = (args.particles, uniform)
     update = custom_gravity_func
-    (kernel, particle_pos) = n_body(init, update, Method.QuadTree)
+    (kernel, gen_lib) = n_body(init, update, M, args.threads, args.theta)
 
     # GUI Renderer related
-    RES = (640, 480)
+    RES = (1280, 960)
     gui = ti.GUI('N-body Star', res=RES)
 
     while gui.running:
-        gui.circles(particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
+        gui.circles(gen_lib.particle_pos.to_numpy(), radius=2, color=0xfbfcbf)
         gui.show()
         kernel()
-

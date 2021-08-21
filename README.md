@@ -9,10 +9,16 @@ To make sure taichi is working, the easiest thing todo is
 python3 -m pip install taichi
 ```
 
+We want to install this local *ti-nbody* package
+
+```
+pip install .
+```
+
 Then for example you can run my Nbody program using
 
 ```
-python n_body.py 10             # For simulating 2^10 particles
+python ./examples/hello_nbody.py
 ```
 
 ## Files
